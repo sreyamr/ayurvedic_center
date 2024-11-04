@@ -20,32 +20,33 @@ class PatientModel {
   DateTime? updatedAt;
 
   PatientModel({
-    required this.id,
-    required this.patientDetailsSet,
-    required this.branch,
-    required this.user,
-    required this.payment,
-    required this.name,
-    required this.phone,
-    required this.address,
+    this.id,
+    this.patientDetailsSet,
+    this.branch,
+    this.user,
+    this.payment,
+    this.name,
+    this.phone,
+    this.address,
     this.price,
-    required this.totalAmount,
-    required this.discountAmount,
-    required this.advanceAmount,
-    required this.balanceAmount,
+    this.totalAmount,
+    this.discountAmount,
+    this.advanceAmount,
+    this.balanceAmount,
     this.dateNdTime,
-    required this.isActive,
-    required this.createdAt,
-    required this.updatedAt,
+    this.isActive,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
-    // Safely access patientdetails_set
     var detailsFromJson = json['patientdetails_set'] as List? ?? [];
-    List<PatientDetail> detailsList = detailsFromJson.map((i) => PatientDetail.fromJson(i)).toList();
+    List<PatientDetail> detailsList =
+        detailsFromJson.map((i) => PatientDetail.fromJson(i)).toList();
 
     // Check for branch existence
-    Branch? branch = json['branch'] != null ? Branch.fromJson(json['branch']) : null;
+    Branch? branch =
+        json['branch'] != null ? Branch.fromJson(json['branch']) : null;
 
     return PatientModel(
       id: json['id'],
@@ -61,7 +62,9 @@ class PatientModel {
       discountAmount: json['discount_amount']?.toDouble() ?? 0.0,
       advanceAmount: json['advance_amount']?.toDouble() ?? 0.0,
       balanceAmount: json['balance_amount']?.toDouble() ?? 0.0,
-      dateNdTime: json['date_nd_time'] != null ? DateTime.parse(json['date_nd_time']) : null,
+      dateNdTime: json['date_nd_time'] != null
+          ? DateTime.parse(json['date_nd_time'])
+          : null,
       isActive: json['is_active'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -100,12 +103,12 @@ class PatientDetail {
   String? treatmentName;
 
   PatientDetail({
-    required this.id,
-    required this.male,
-    required this.female,
-    required this.patient,
-    required this.treatment,
-    required this.treatmentName,
+    this.id,
+    this.male,
+    this.female,
+    this.patient,
+    this.treatment,
+    this.treatmentName,
   });
 
   factory PatientDetail.fromJson(Map<String, dynamic> json) {

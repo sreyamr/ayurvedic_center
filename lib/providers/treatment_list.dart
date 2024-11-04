@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../config/app_controller.dart';
 import '../data/urls.dart';
-import '../models/treamentlist_model.dart';
+import '../models/treatmentlist_model.dart';
 
 class TreatmentList with ChangeNotifier {
   List<Treatment> _treatments = [];

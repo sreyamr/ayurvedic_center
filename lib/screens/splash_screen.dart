@@ -9,7 +9,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushNamed(context, AppRoutes.login);
+        Navigator.pushNamed(context, AppRoutes.home);
       });
     });
     return Scaffold(

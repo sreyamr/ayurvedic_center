@@ -4,4 +4,5 @@ class Urls{
   static const patientList = "$baseUrl/PatientList";
   static const branchList = "$baseUrl/BranchList";
   static const treatmentList = "$baseUrl/TreatmentList";
+  static const addPatient = "$baseUrl/PatientUpdate";
 }
