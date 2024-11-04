@@ -10,10 +10,12 @@ class AddPatient with ChangeNotifier {
   PatientModel? _patientModel;
   bool _addSuccess = false;
   String? _errorMessage;
+  List<PatientDetail> _patientDetailsList = []; // Store the list of patient details
 
   PatientModel? get patientModel => _patientModel;
   bool get addSuccess => _addSuccess;
   String? get errorMessage => _errorMessage;
+  List<PatientDetail> get patientDetailsList => _patientDetailsList; // Expose the patient details list
 
   Future<void> addPatient(PatientModel patient) async {
     final url = Uri.parse(Urls.addPatient);
@@ -27,7 +29,7 @@ class AddPatient with ChangeNotifier {
         headers: {
           "Authorization": "Bearer $token",
         },
-        body: jsonData,
+        body: json.encode(jsonData), // Ensure you're encoding the JSON
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -36,7 +38,7 @@ class AddPatient with ChangeNotifier {
         await AppController.saveToken(token);
         _addSuccess = true;
       } else {
-        print('Login failed: ${response.body}');
+        print('Add Patient failed: ${response.body}');
         _addSuccess = false;
       }
       notifyListeners();
@@ -46,5 +48,15 @@ class AddPatient with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void addTreatment(PatientDetail patientDetail) {
+    _patientDetailsList.add(patientDetail);
+    notifyListeners(); // Notify listeners about the change
+  }
+  void removePatientDetail(PatientDetail patientDetail) {
+    patientDetailsList.remove(patientDetail);
+    notifyListeners(); // Notify listeners to rebuild the UI
+  }
 }
+
 

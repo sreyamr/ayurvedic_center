@@ -70,22 +70,22 @@ class _RegistrationState extends State<Registration> {
                 buildInputField(
                     context, "Name", nameController, "Enter your name"),
                 buildInputField(context, "WhatsApp Number", whatsappController,
-                    "Enter your WhatsApp number"),
+                    "Enter your WhatsApp number", isNumber: true,),
                 buildInputField(context, "Address", addressController,
                     "Enter your address"),
                 buildLocationDropdown(context),
                 buildBranchDropdown(context),
-               // buildPatientDetails(),
+                buildPatientDetails(),
                 buildAddTreatmentButton(context),
                 buildInputField(context, "Total Amount", totalAmountController,
-                    "Enter total amount"),
+                    "Enter total amount", isNumber: true,),
                 buildInputField(context, "Discount Amount",
-                    discountAmountController, "Enter discount amount"),
+                    discountAmountController, "Enter discount amount", isNumber: true,),
                 buildPaymentMode(context),
                 buildInputField(context, "Advance Amount",
-                    advanceAmountController, "Enter advance amount"),
+                    advanceAmountController, "Enter advance amount", isNumber: true,),
                 buildInputField(context, "Balance Amount",
-                    balanceAmountController, "Enter balance amount"),
+                    balanceAmountController, "Enter balance amount", isNumber: true,),
                 buildTreatMentDate(),
                 const SizedBox(
                   height: 20,
@@ -104,7 +104,8 @@ class _RegistrationState extends State<Registration> {
 
   /// buildInputField
   Widget buildInputField(BuildContext context, String label,
-      TextEditingController controller, String hint) {
+      TextEditingController controller, String hint,
+      {bool isNumber = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -120,6 +121,7 @@ class _RegistrationState extends State<Registration> {
         ),
         TextFormField(
           controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           decoration: InputDecoration(
             hintText: hint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
@@ -129,6 +131,7 @@ class _RegistrationState extends State<Registration> {
       ],
     );
   }
+
 
   /// buildLocationDropdown
   Widget buildLocationDropdown(BuildContext context) {
@@ -189,7 +192,7 @@ class _RegistrationState extends State<Registration> {
           alignment: Alignment.centerRight,
           children: [
             DropdownButtonFormField<Branch>(
-              value: selectedBranch,
+              value: branchProvider.branches.contains(selectedBranch) ? selectedBranch : null,
               hint: const Text("Select a branch"),
               items: branchProvider.branches.map((branch) {
                 return DropdownMenuItem<Branch>(
@@ -200,16 +203,16 @@ class _RegistrationState extends State<Registration> {
               onChanged: branchProvider.isBranchLoading
                   ? null
                   : (Branch? newBranch) {
-                      setState(() {
-                        selectedBranch = newBranch; // Update with Branch object
-                      });
-                    },
+                setState(() {
+                  selectedBranch = newBranch;
+                });
+              },
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               ),
             ),
             if (branchProvider.isBranchLoading)
@@ -223,6 +226,7 @@ class _RegistrationState extends State<Registration> {
       ],
     );
   }
+
 
   /// buildTreatmentDropdown
   Widget buildTreatmentDropdown(BuildContext context) {
@@ -243,34 +247,37 @@ class _RegistrationState extends State<Registration> {
         ),
         Stack(
           children: [
-            DropdownButtonFormField<String>(
-              value: null,
-              hint: Text(selectedTreatmentNames.isEmpty
-                  ? "Select a treatment"
-                  : selectedTreatmentNames.join(", ")),
-              items: treatmentProvider.treatments.map((treatment) {
-                return DropdownMenuItem<String>(
-                  value: treatment.name,
-                  child: Text(treatment.name.toString()),
-                );
-              }).toList(),
-              onChanged: treatmentProvider.isTreatmentLoading
-                  ? null
-                  : (String? newValue) {
-                      setState(() {
-                        if (newValue != null) {
-                          // Add or remove treatment name from the list
-                          if (selectedTreatmentNames.contains(newValue)) {
-                            selectedTreatmentNames.remove(newValue);
-                          } else {
-                            selectedTreatmentNames.add(newValue);
-                          }
-                        }
-                      });
-                    },
-              decoration: InputDecoration(
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            Container(
+              width: double.infinity,
+              child: DropdownButtonFormField<String>(
+                value: null,
+                hint: Text(selectedTreatmentNames.isEmpty
+                    ? "Select a treatment"
+                    : selectedTreatmentNames.join(", ")),
+                items: treatmentProvider.treatments.map((treatment) {
+                  return DropdownMenuItem<String>(
+                    value: treatment.name,
+                    child: Text(treatment.name.toString()),
+                  );
+                }).toList(),
+                onChanged: treatmentProvider.isTreatmentLoading
+                    ? null
+                    : (String? newValue) {
+                  setState(() {
+                    if (newValue != null) {
+                      // Add or remove treatment name from the list
+                      if (selectedTreatmentNames.contains(newValue)) {
+                        selectedTreatmentNames.remove(newValue);
+                      } else {
+                        selectedTreatmentNames.add(newValue);
+                      }
+                    }
+                  });
+                },
+                decoration: InputDecoration(
+                  border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
               ),
             ),
             if (treatmentProvider.isTreatmentLoading)
@@ -285,6 +292,7 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
+  /// buildPaymentMode
   Widget buildPaymentMode(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +379,7 @@ class _RegistrationState extends State<Registration> {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      readOnly: true, // Makes sure the TextField is not editable
+      readOnly: true,
     );
   }
 
@@ -417,11 +425,8 @@ class _RegistrationState extends State<Registration> {
       address: addressController.text,
       branch: selectedBranch,
       payment: _selectedPaymentMethod,
-      patientDetailsSet: selectedTreatmentNames
-          .map((treatmentName) => PatientDetail(
-                treatmentName: treatmentName,
-              ))
-          .toList(),
+      user:nameController.text,
+      patientDetailsSet: patientDetailsList,
       totalAmount: double.tryParse(totalAmountController.text) ?? 0.0,
       discountAmount: double.tryParse(discountAmountController.text) ?? 0.0,
       advanceAmount: double.tryParse(advanceAmountController.text) ?? 0.0,
@@ -441,6 +446,7 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
+  ///buildAddTreatmentButton
   Widget buildAddTreatmentButton(BuildContext context) {
     return SizedBox(
       width: 300,
@@ -452,30 +458,31 @@ class _RegistrationState extends State<Registration> {
               return StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return AddTreatmentSheet(
-                      context, setState); // Pass setState to the sheet
+                      context, setState);
                 },
               );
             },
           );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade200, // Set your desired background color here
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0), // Optional padding
+          backgroundColor: Colors.green.shade200,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0), // Rounded corners
+            borderRadius: BorderRadius.circular(8.0),
           ),
         ),
         child: const Text(
           'Add Treatment',
-          style: TextStyle(color: Colors.black), // Set text color if needed
+          style: TextStyle(color: Colors.black),
         ),
       ),
     );
   }
 
-
+/// AddTreatmentSheet
   Widget AddTreatmentSheet(BuildContext context, StateSetter setState) {
     final theme = Theme.of(context);
+    final addPatientProvider = Provider.of<AddPatient>(context, listen: false);
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -487,8 +494,7 @@ class _RegistrationState extends State<Registration> {
           const SizedBox(height: 20),
           Text(
             'Add Patients',
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
@@ -515,7 +521,6 @@ class _RegistrationState extends State<Registration> {
                     icon: Icon(Icons.remove_circle, color: theme.primaryColor),
                     onPressed: () {
                       setState(() {
-                        // Use StateSetter's setState
                         if (maleCount > 0) maleCount--;
                       });
                     },
@@ -528,7 +533,6 @@ class _RegistrationState extends State<Registration> {
                     icon: Icon(Icons.add_circle, color: theme.primaryColor),
                     onPressed: () {
                       setState(() {
-                        // Use StateSetter's setState
                         maleCount++;
                       });
                     },
@@ -562,7 +566,6 @@ class _RegistrationState extends State<Registration> {
                     icon: Icon(Icons.remove_circle, color: theme.primaryColor),
                     onPressed: () {
                       setState(() {
-                        // Use StateSetter's setState
                         if (femaleCount > 0) femaleCount--;
                       });
                     },
@@ -575,7 +578,6 @@ class _RegistrationState extends State<Registration> {
                     icon: Icon(Icons.add_circle, color: theme.primaryColor),
                     onPressed: () {
                       setState(() {
-                        // Use StateSetter's setState
                         femaleCount++;
                       });
                     },
@@ -595,7 +597,7 @@ class _RegistrationState extends State<Registration> {
                     ? selectedTreatmentNames.join(", ")
                     : null,
               );
-              patientDetailsList.add(patientDetail);
+              addPatientProvider.addTreatment(patientDetail);
               Navigator.of(context).pop();
             },
             style: ElevatedButton.styleFrom(
@@ -615,124 +617,115 @@ class _RegistrationState extends State<Registration> {
     );
   }
 
+/// buildPatientDetails
   Widget buildPatientDetails() {
-    return Expanded(
-        child: ListView.builder(
-            itemCount: patientDetailsList.length,
+    return SizedBox(
+      height: 100,
+      child: Consumer<AddPatient>(
+        builder: (context, addPatientProvider, child) {
+          if (addPatientProvider.patientDetailsList.isEmpty) {
+
+            return SizedBox(
+              child: Center(
+                child: Text(
+                  'No patient details available.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                ),
+              ),
+            );
+          }
+          return ListView.builder(
+            itemCount: addPatientProvider.patientDetailsList.length,
             itemBuilder: (context, index) {
-              final patientDetail = patientDetailsList[index];
+              final patientDetail = addPatientProvider.patientDetailsList[index];
               return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${index + 1}. ',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(
-                                                fontWeight: FontWeight.bold),
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          patientDetail.treatmentName ??
-                                              "No treatment name",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
+                            Row(
+                              children: [
+                                Text(
+                                  '${index + 1}. ',
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    patientDetail.treatmentName ?? "No treatment name",
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Male',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.green),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.grey.shade300),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          patientDetail.male ?? "0",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Text(
-                                        'Female',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.green),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.grey.shade300),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          patientDetail.female ?? "0",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            Row(children: [
-                              IconButton(
-                                icon: Icon(Icons.edit, color: Colors.green),
-                                onPressed: () {
-                                  // Handle edit action
-                                },
-                              ),
-                              IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    setState(() {
-                                      patientDetailsList.removeAt(index);
-                                    });
-                                  })
-                            ])
-                          ])));
-            }));
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Text('Male', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.green)),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    patientDetail.male ?? "0",
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Text('Female', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.green)),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    patientDetail.female ?? "0",
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.green),
+                            onPressed: () {
+
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              addPatientProvider.removePatientDetail(patientDetail);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }

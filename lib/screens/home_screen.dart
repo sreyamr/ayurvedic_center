@@ -53,9 +53,11 @@ class HomeScreen extends StatelessWidget {
         builder: (context, patientProvider, child) {
           return RefreshIndicator(
             onRefresh: () async {
-              patientProvider.getPatientList();
+              await patientProvider.getPatientList();
             },
-            child: patientProvider.filteredPatients.isEmpty
+            child: patientProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : patientProvider.filteredPatients.isEmpty
                 ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -182,7 +184,6 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
-
           );
         },
       ),
@@ -190,6 +191,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  ///buildFloatingActionButton
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () {

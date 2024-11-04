@@ -30,7 +30,7 @@ class Treatment {
       name: json['name'],
       duration: json['duration'],
       price:
-          double.tryParse(json['price'].toString()) ?? 0.0, // Parse as double
+          double.tryParse(json['price'].toString()) ?? 0.0,
       isActive: json['is_active'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),

@@ -75,7 +75,7 @@ class LoginScreen extends StatelessWidget {
   Widget buildTextField(String label, TextEditingController controller, {bool isPassword = false}) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+     // obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
